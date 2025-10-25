@@ -208,7 +208,7 @@ func (t *BashTool) IsExternal() bool {
 func isDangerousCommand(command string) bool {
 	cmd := strings.ToLower(strings.TrimSpace(command))
 
-	// List of dangerous patterns
+	// List of dangerous patterns (all lowercase since we lowercase the command)
 	dangerousPatterns := []string{
 		"rm -rf /",
 		"rm -rf /*",
@@ -219,7 +219,7 @@ func isDangerousCommand(command string) bool {
 		"mkfs",
 		"format c:",
 		":(){:|:&};:", // Fork bomb
-		"chmod -R 777 /",
+		"chmod -r 777 /",
 	}
 
 	for _, pattern := range dangerousPatterns {

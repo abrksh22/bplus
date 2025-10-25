@@ -130,9 +130,9 @@ func (pm *PermissionManager) Check(ctx context.Context, req *PermissionRequest) 
 			return granted, nil
 		}
 
-		// No prompt handler, deny
+		// No prompt handler and not granted - return false without error
 		pm.logAudit(req, false)
-		return false, fmt.Errorf("permission denied: %s", req.Permission)
+		return false, nil
 	}
 
 	pm.logAudit(req, false)
