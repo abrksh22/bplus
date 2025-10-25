@@ -1,0 +1,164 @@
+# b+ Configuration File
+# This is a complete example configuration showing all available options
+# Copy this to ~/.config/bplus/config.yaml or .b+/config.yaml in your project
+
+# Execution mode: "fast" (Layer 4 only) or "thorough" (all layers)
+mode: thorough
+
+# Model configuration
+models:
+  # Default model used for all layers (unless overridden)
+  default: "anthropic/claude-sonnet-4-5"
+
+  # Per-layer model overrides (optional)
+  layers:
+    intent_clarification: "openai/gpt-4-turbo"
+    synthesis: "anthropic/claude-opus-4-1"
+    validation: "openai/gpt-4-turbo"
+
+# Provider configurations
+providers:
+  anthropic:
+    api_key: "${ANTHROPIC_API_KEY}"  # Use environment variable
+    base_url: "https://api.anthropic.com"
+    timeout: 300s
+    max_retries: 3
+
+  openai:
+    api_key: "${OPENAI_API_KEY}"
+    base_url: "https://api.openai.com/v1"
+    timeout: 300s
+    max_retries: 3
+
+  gemini:
+    api_key: "${GOOGLE_API_KEY}"
+    base_url: "https://generativelanguage.googleapis.com/v1beta"
+    timeout: 300s
+    max_retries: 3
+
+  ollama:
+    base_url: "http://localhost:11434"
+    timeout: 300s
+    max_retries: 3
+
+  lmstudio:
+    base_url: "http://localhost:1234"
+    timeout: 300s
+    max_retries: 3
+
+# Layer-specific configuration
+layers:
+  # Layer 1: Intent Clarification
+  intent_clarification:
+    enabled: true
+    model: "openai/gpt-4-turbo"
+    max_turns: 5
+
+  # Layer 2: Parallel Planning
+  parallel_planning:
+    enabled: true
+    num_plans: 4
+    models:
+      - "anthropic/claude-opus-4-1"
+      - "anthropic/claude-sonnet-4-5"
+      - "gemini/gemini-2-5-pro"
+      - "ollama/deepseek-coder:33b"
+
+  # Layer 3: Plan Synthesis
+  synthesis:
+    enabled: true
+    model: "anthropic/claude-opus-4-1"
+
+  # Layer 4: Main Agent (cannot be disabled)
+  main_agent:
+    enabled: true
+    model: "anthropic/claude-sonnet-4-5"
+
+  # Layer 5: Validation
+  validation:
+    enabled: true
+    model: "openai/gpt-4-turbo"
+    max_iterations: 3
+    strict_mode: false
+
+  # Layer 6: Context Management (cannot be disabled)
+  context_management:
+    enabled: true
+    model: "openai/gpt-4-turbo"
+    max_context_tokens: 200000
+
+# Tool configuration
+tools:
+  # Empty arrays mean all tools enabled/disabled by default
+  enabled_tools: []
+  disabled_tools: []
+
+  # Categories to auto-approve (use with caution!)
+  auto_approve: []
+
+  # MCP Server configurations
+  mcp_servers:
+    github:
+      command: "github-mcp-server"
+      args: []
+      env:
+        GITHUB_TOKEN: "${GITHUB_TOKEN}"
+      transport: "stdio"
+
+# UI configuration
+ui:
+  theme: "dark"           # "dark", "light", "solarized", etc.
+  no_color: false
+  quiet: false
+  verbose: false
+  show_cost: true
+  show_tokens: true
+  show_layers: true
+
+# Session management
+session:
+  auto_save: true
+  save_interval: 5m
+  checkpoint_enabled: false
+  checkpoint_interval: 5m
+  max_history_size: 1000
+
+# Security settings
+security:
+  sandbox: false
+  auto_approve_read: false
+  auto_approve_write: false
+  auto_approve_exec: false
+  auto_approve_network: false
+  ignore_patterns:
+    - "node_modules/**"
+    - ".git/**"
+    - "**/*.log"
+    - "**/*.tmp"
+    - "dist/**"
+    - "build/**"
+
+# Cost management
+cost:
+  budget_enabled: false
+  session_budget: 0.0     # USD
+  daily_budget: 0.0       # USD
+  monthly_budget: 0.0     # USD
+  alert_threshold: 80.0   # Percentage
+  free_only: false
+
+# Performance settings
+performance:
+  max_parallel: 4
+  cache_enabled: true
+  default_timeout: 5m
+  max_context_size: 200000
+
+# Logging configuration
+logging:
+  level: "info"           # "debug", "info", "warn", "error"
+  format: "text"          # "text", "json"
+  file: ""                # Empty = stderr only
+  max_size: 100           # MB
+  max_backups: 3
+  max_age: 28             # Days
