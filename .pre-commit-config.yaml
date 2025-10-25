@@ -1,0 +1,40 @@
+# Pre-commit hooks for b+ (Be Positive)
+# Install pre-commit: pip install pre-commit
+# Setup hooks: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Go formatting
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-fmt
+        args: [-w]
+      - id: go-vet
+      - id: go-mod-tidy
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.md$
+      - id: end-of-file-fixer
+        exclude: \.md$
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: mixed-line-ending
+
+  # Run full check suite
+  - repo: local
+    hooks:
+      - id: make-check
+        name: make check (fmt, vet, lint, test)
+        entry: make
+        args: [check]
+        language: system
+        pass_filenames: false
+        always_run: true
