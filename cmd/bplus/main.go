@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/abrksh22/bplus/ui"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 var (
@@ -13,27 +16,33 @@ var (
 )
 
 func main() {
-	// Print version information
-	fmt.Printf("b+ (Be Positive) v%s\n", Version)
-	fmt.Printf("Commit: %s\n", Commit)
-	fmt.Printf("Built: %s\n", BuildTime)
-	fmt.Println()
+	// Parse command-line flags (TODO: Implement in later phase)
+	// For now, just start the UI
 
-	// TODO: Initialize application
-	// This will be implemented in Phase 2 (Core Infrastructure) and Phase 3 (Terminal UI)
-	fmt.Println("Welcome to b+ - The Next-Generation Agentic Terminal Coding Assistant!")
-	fmt.Println()
-	fmt.Println("🚧 Currently under development - Phase 1: Foundation")
-	fmt.Println()
-	fmt.Println("Features coming soon:")
-	fmt.Println("  ✓ 7-Layer AI Architecture")
-	fmt.Println("  ✓ Multi-Model Support (Anthropic, OpenAI, Gemini, Ollama)")
-	fmt.Println("  ✓ Pluggable Tool System")
-	fmt.Println("  ✓ LSP Integration")
-	fmt.Println("  ✓ MCP Support")
-	fmt.Println("  ✓ Community Plugin Marketplace")
-	fmt.Println()
-	fmt.Println("Stay tuned! 🎉")
+	// Create the UI model
+	model := ui.New()
+
+	// Create the Bubble Tea program
+	program := tea.NewProgram(
+		model,
+		tea.WithAltScreen(),       // Use alternate screen buffer
+		tea.WithMouseCellMotion(), // Enable mouse support
+	)
+
+	// Start the program
+	finalModel, err := program.Run()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error running b+: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Check if there was an error in the final model
+	if m, ok := finalModel.(*ui.Model); ok {
+		if m.Error() != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", m.Error())
+			os.Exit(1)
+		}
+	}
 
 	os.Exit(0)
 }
