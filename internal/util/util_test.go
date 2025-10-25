@@ -395,3 +395,208 @@ func TestHTTPGet(t *testing.T) {
 	// We just check it doesn't panic - actual result depends on network
 	_ = err
 }
+
+// Retry utilities tests
+
+func TestDefaultRetryConfig(t *testing.T) {
+	config := DefaultRetryConfig()
+	assert.Equal(t, 3, config.MaxAttempts)
+	assert.Equal(t, 100*time.Millisecond, config.InitialDelay)
+	assert.Equal(t, 10*time.Second, config.MaxDelay)
+	assert.Equal(t, 2.0, config.Multiplier)
+	assert.True(t, config.Jitter)
+}
+
+func TestRetry_Success(t *testing.T) {
+	ctx := context.Background()
+	config := DefaultRetryConfig()
+
+	attempts := 0
+	fn := func() error {
+		attempts++
+		return nil // Success on first try
+	}
+
+	err := Retry(ctx, config, fn)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, attempts)
+}
+
+func TestRetry_SuccessAfterRetries(t *testing.T) {
+	ctx := context.Background()
+	config := RetryConfig{
+		MaxAttempts:  5,
+		InitialDelay: 10 * time.Millisecond,
+		MaxDelay:     100 * time.Millisecond,
+		Multiplier:   2.0,
+		Jitter:       false, // Disable jitter for predictable timing
+	}
+
+	attempts := 0
+	fn := func() error {
+		attempts++
+		if attempts < 3 {
+			return assert.AnError
+		}
+		return nil // Success on third try
+	}
+
+	start := time.Now()
+	err := Retry(ctx, config, fn)
+	elapsed := time.Since(start)
+
+	assert.NoError(t, err)
+	assert.Equal(t, 3, attempts)
+	// Should have delays: 10ms + 20ms = 30ms minimum
+	assert.GreaterOrEqual(t, elapsed, 30*time.Millisecond)
+}
+
+func TestRetry_MaxAttemptsExceeded(t *testing.T) {
+	ctx := context.Background()
+	config := RetryConfig{
+		MaxAttempts:  3,
+		InitialDelay: 1 * time.Millisecond,
+		MaxDelay:     10 * time.Millisecond,
+		Multiplier:   2.0,
+		Jitter:       false,
+	}
+
+	attempts := 0
+	fn := func() error {
+		attempts++
+		return assert.AnError
+	}
+
+	err := Retry(ctx, config, fn)
+	assert.Error(t, err)
+	assert.Equal(t, 3, attempts)
+	assert.Contains(t, err.Error(), "max retry attempts")
+}
+
+func TestRetry_ContextCancellation(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+
+	config := RetryConfig{
+		MaxAttempts:  10,
+		InitialDelay: 20 * time.Millisecond,
+		MaxDelay:     100 * time.Millisecond,
+		Multiplier:   2.0,
+		Jitter:       false,
+	}
+
+	attempts := 0
+	fn := func() error {
+		attempts++
+		return assert.AnError
+	}
+
+	err := Retry(ctx, config, fn)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "retry cancelled")
+	assert.Less(t, attempts, 10) // Should stop before max attempts due to timeout
+}
+
+func TestRetryWithCondition_NonRetryableError(t *testing.T) {
+	ctx := context.Background()
+	config := DefaultRetryConfig()
+
+	attempts := 0
+	fn := func() error {
+		attempts++
+		return assert.AnError // Non-retryable based on condition
+	}
+
+	// Make all errors non-retryable
+	isRetryableNone := func(err error) bool { return false }
+
+	err := RetryWithCondition(ctx, config, fn, isRetryableNone)
+	assert.Error(t, err)
+	assert.Equal(t, 1, attempts) // Should stop after first attempt
+	assert.Contains(t, err.Error(), "non-retryable")
+}
+
+func TestRetryWithBackoff(t *testing.T) {
+	ctx := context.Background()
+
+	attempts := 0
+	fn := func() error {
+		attempts++
+		if attempts < 2 {
+			return assert.AnError
+		}
+		return nil
+	}
+
+	err := RetryWithBackoff(ctx, 3, 10*time.Millisecond, 100*time.Millisecond, fn)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, attempts)
+}
+
+func TestRetry_ExponentialBackoff(t *testing.T) {
+	ctx := context.Background()
+	config := RetryConfig{
+		MaxAttempts:  4,
+		InitialDelay: 10 * time.Millisecond,
+		MaxDelay:     200 * time.Millisecond,
+		Multiplier:   2.0,
+		Jitter:       false,
+	}
+
+	attempts := 0
+	delays := []time.Duration{}
+	lastTime := time.Now()
+
+	fn := func() error {
+		now := time.Now()
+		if attempts > 0 {
+			delays = append(delays, now.Sub(lastTime))
+		}
+		lastTime = now
+		attempts++
+		return assert.AnError
+	}
+
+	err := Retry(ctx, config, fn)
+	assert.Error(t, err)
+	assert.Equal(t, 4, attempts)
+
+	// Verify exponential growth: 10ms, 20ms, 40ms
+	require.Len(t, delays, 3)
+	assert.GreaterOrEqual(t, delays[0], 10*time.Millisecond)
+	assert.GreaterOrEqual(t, delays[1], 20*time.Millisecond)
+	assert.GreaterOrEqual(t, delays[2], 40*time.Millisecond)
+}
+
+func TestRetry_MaxDelayRespected(t *testing.T) {
+	ctx := context.Background()
+	config := RetryConfig{
+		MaxAttempts:  5,
+		InitialDelay: 50 * time.Millisecond,
+		MaxDelay:     100 * time.Millisecond,
+		Multiplier:   3.0, // Large multiplier to test max delay
+		Jitter:       false,
+	}
+
+	attempts := 0
+	delays := []time.Duration{}
+	lastTime := time.Now()
+
+	fn := func() error {
+		now := time.Now()
+		if attempts > 0 {
+			delays = append(delays, now.Sub(lastTime))
+		}
+		lastTime = now
+		attempts++
+		return assert.AnError
+	}
+
+	err := Retry(ctx, config, fn)
+	assert.Error(t, err)
+
+	// All delays should be <= MaxDelay (100ms)
+	for _, delay := range delays {
+		assert.LessOrEqual(t, delay, 120*time.Millisecond) // Allow some tolerance
+	}
+}

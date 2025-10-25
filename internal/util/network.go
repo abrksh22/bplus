@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"fmt"
+	"math"
 	"net"
 	"net/http"
 	"net/url"
@@ -136,4 +137,118 @@ func ParseHostPort(hostPort string) (string, int, error) {
 // JoinHostPort joins host and port into host:port string
 func JoinHostPort(host string, port int) string {
 	return net.JoinHostPort(host, fmt.Sprintf("%d", port))
+}
+
+// RetryConfig configures retry behavior with exponential backoff
+type RetryConfig struct {
+	MaxAttempts  int           // Maximum number of retry attempts (default: 3)
+	InitialDelay time.Duration // Initial delay between retries (default: 100ms)
+	MaxDelay     time.Duration // Maximum delay between retries (default: 10s)
+	Multiplier   float64       // Backoff multiplier (default: 2.0)
+	Jitter       bool          // Add jitter to delays (default: true)
+}
+
+// DefaultRetryConfig returns a sensible default retry configuration
+func DefaultRetryConfig() RetryConfig {
+	return RetryConfig{
+		MaxAttempts:  3,
+		InitialDelay: 100 * time.Millisecond,
+		MaxDelay:     10 * time.Second,
+		Multiplier:   2.0,
+		Jitter:       true,
+	}
+}
+
+// RetryFunc is a function that may fail and should be retried
+type RetryFunc func() error
+
+// IsRetryable determines if an error should trigger a retry
+type IsRetryable func(error) bool
+
+// Retry executes a function with exponential backoff
+func Retry(ctx context.Context, config RetryConfig, fn RetryFunc) error {
+	return RetryWithCondition(ctx, config, fn, nil)
+}
+
+// RetryWithCondition executes a function with exponential backoff and custom retry condition
+func RetryWithCondition(ctx context.Context, config RetryConfig, fn RetryFunc, isRetryable IsRetryable) error {
+	// Validate and apply defaults
+	if config.MaxAttempts <= 0 {
+		config.MaxAttempts = 3
+	}
+	if config.InitialDelay <= 0 {
+		config.InitialDelay = 100 * time.Millisecond
+	}
+	if config.MaxDelay <= 0 {
+		config.MaxDelay = 10 * time.Second
+	}
+	if config.Multiplier <= 0 {
+		config.Multiplier = 2.0
+	}
+
+	var lastErr error
+	delay := config.InitialDelay
+
+	for attempt := 1; attempt <= config.MaxAttempts; attempt++ {
+		// Check context cancellation before attempt
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("retry cancelled: %w", ctx.Err())
+		default:
+		}
+
+		// Execute the function
+		err := fn()
+		if err == nil {
+			return nil // Success
+		}
+
+		lastErr = err
+
+		// Check if we should retry this error
+		if isRetryable != nil && !isRetryable(err) {
+			return fmt.Errorf("non-retryable error: %w", err)
+		}
+
+		// Don't sleep after the last attempt
+		if attempt >= config.MaxAttempts {
+			break
+		}
+
+		// Calculate next delay with exponential backoff
+		nextDelay := time.Duration(float64(delay) * config.Multiplier)
+		if nextDelay > config.MaxDelay {
+			nextDelay = config.MaxDelay
+		}
+
+		// Add jitter if enabled (±25% randomness)
+		if config.Jitter {
+			jitterRange := float64(nextDelay) * 0.25
+			jitterOffset := (math.Float64frombits(uint64(time.Now().UnixNano())) - 0.5) * jitterRange
+			nextDelay = time.Duration(float64(nextDelay) + jitterOffset)
+		}
+
+		// Wait before next attempt
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("retry cancelled after %d attempts: %w", attempt, ctx.Err())
+		case <-time.After(delay):
+		}
+
+		delay = nextDelay
+	}
+
+	return fmt.Errorf("max retry attempts (%d) exceeded: %w", config.MaxAttempts, lastErr)
+}
+
+// RetryWithBackoff is a convenience wrapper for Retry with custom backoff parameters
+func RetryWithBackoff(ctx context.Context, maxAttempts int, initialDelay, maxDelay time.Duration, fn RetryFunc) error {
+	config := RetryConfig{
+		MaxAttempts:  maxAttempts,
+		InitialDelay: initialDelay,
+		MaxDelay:     maxDelay,
+		Multiplier:   2.0,
+		Jitter:       true,
+	}
+	return Retry(ctx, config, fn)
 }
