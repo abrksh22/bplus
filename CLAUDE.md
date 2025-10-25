@@ -43,6 +43,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Complete all critical requirements of a phase before marking it complete
 - Update VERIFICATION.md when a phase is complete
 
+### 6. Search Before You Code - CRITICAL
+- **NEVER create new code without first searching for existing implementations**
+- **ALWAYS follow this sequence when encountering missing/broken code:**
+  1. **SEARCH**: Use `find`, `grep`, `Glob` to locate existing code
+  2. **READ**: Examine existing implementations to understand patterns and APIs
+  3. **VERIFY**: Check VERIFICATION.md to see what's marked as complete
+  4. **ADAPT**: Modify integration code to work with existing APIs
+  5. **ONLY THEN**: Create new code if nothing exists
+- **When you see a compilation error:**
+  - ❌ **WRONG**: Assume code doesn't exist and create stub/placeholder
+  - ✅ **RIGHT**: Search codebase for existing implementation
+  - ✅ **RIGHT**: Read existing code to understand actual function signatures
+  - ✅ **RIGHT**: Fix the calling code to match the existing API
+- **Specific anti-patterns to avoid:**
+  - Creating "stub" or "mock" implementations when real code exists
+  - Writing `NewXXX()` wrapper functions instead of using existing `New()` patterns
+  - Assuming packages don't exist without searching
+  - Ignoring VERIFICATION.md completion status
+- **Example of correct behavior:**
+  ```
+  ERROR: undefined: anthropic.NewProvider
+  ❌ WRONG: Create stub_provider.go with placeholder
+  ✅ RIGHT:
+    1. Search: find models/providers/anthropic -name "*.go"
+    2. Read: models/providers/anthropic/anthropic.go
+    3. Discover: func New(apiKey string, opts ...Option)
+    4. Fix: Change calling code to use anthropic.New()
+  ```
+
 ---
 
 ## Project Overview

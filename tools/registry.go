@@ -100,6 +100,18 @@ func (r *Registry) List() []string {
 	return names
 }
 
+// AllTools returns all registered tools.
+func (r *Registry) AllTools() []Tool {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	tools := make([]Tool, 0, len(r.tools))
+	for _, tool := range r.tools {
+		tools = append(tools, tool)
+	}
+	return tools
+}
+
 // ListByCategory returns all tools in a specific category.
 func (r *Registry) ListByCategory(category string) []Tool {
 	r.mu.RLock()

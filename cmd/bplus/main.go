@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
+	"github.com/abrksh22/bplus/app"
 	"github.com/abrksh22/bplus/ui"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -47,21 +51,43 @@ func main() {
 		os.Exit(0)
 	}
 
-	// TODO: Use debug, fast, thorough, and config flags in later phases
-	// For now, store them for future use
-	_ = debugMode
-	_ = fastMode
-	_ = thoroughMode
-	_ = configFile
+	// Initialize application
+	opts := &app.Options{
+		Version:    Version,
+		ConfigPath: *configFile,
+		DebugMode:  *debugMode,
+		FastMode:   *fastMode,
+		Thorough:   *thoroughMode,
+	}
 
-	// Create the UI model
-	model := ui.New()
+	application, err := app.New(opts)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to initialize b+: %v\n", err)
+		os.Exit(1)
+	}
+	defer application.Close()
+
+	// Setup context with cancellation
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Handle interrupt signal
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigChan
+		cancel()
+	}()
+
+	// Create the UI model with application
+	model := ui.NewWithApp(application)
 
 	// Create the Bubble Tea program
 	program := tea.NewProgram(
 		model,
 		tea.WithAltScreen(),       // Use alternate screen buffer
 		tea.WithMouseCellMotion(), // Enable mouse support
+		tea.WithContext(ctx),      // Use context for cancellation
 	)
 
 	// Start the program

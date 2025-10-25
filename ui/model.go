@@ -19,6 +19,9 @@ type Model struct {
 	view             ViewMode
 	focusedComponent string
 
+	// Application reference (Phase 6)
+	app interface{} // Will be *app.Application, using interface{} to avoid circular import
+
 	// UI Components (will be populated in Phase 3.2)
 	// input      *InputComponent
 	// output     *OutputComponent
@@ -53,6 +56,13 @@ func New() *Model {
 		theme:            DefaultTheme(),
 		keys:             DefaultKeyMap(),
 	}
+}
+
+// NewWithApp creates a new UI model with application reference.
+func NewWithApp(application interface{}) *Model {
+	m := New()
+	m.app = application
+	return m
 }
 
 // Init initializes the model (Bubble Tea lifecycle method).

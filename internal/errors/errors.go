@@ -101,6 +101,16 @@ func New(code ErrorCode, message string) *Error {
 	}
 }
 
+// Newf creates a new Error with a formatted message
+func Newf(code ErrorCode, format string, args ...interface{}) *Error {
+	return &Error{
+		Code:        code,
+		Message:     fmt.Sprintf(format, args...),
+		Retryable:   false,
+		Recoverable: false,
+	}
+}
+
 // Wrap wraps an existing error with a b+ error
 func Wrap(err error, code ErrorCode, message string) *Error {
 	if err == nil {

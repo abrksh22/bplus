@@ -502,6 +502,7 @@ type Tool interface {
 - [ ] Implement function calling format compatible with multiple providers:
   - OpenAI function calling format
   - Anthropic tool use format
+  - Gemini function calling format
   - Fallback XML-based format
 - [ ] Parse tool calls from LLM responses
 - [ ] Format tool results for LLM
