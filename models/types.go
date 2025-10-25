@@ -35,14 +35,14 @@ type Provider interface {
 
 // Model represents an available LLM model.
 type Model struct {
-	ID           string    // Unique identifier (e.g., "claude-sonnet-4-5")
-	Name         string    // Human-readable name
-	Provider     string    // Provider name
-	ContextWindow int      // Maximum context window in tokens
-	MaxOutput    int       // Maximum output tokens
-	Pricing      Pricing   // Cost information
-	Capabilities []string  // Supported features (e.g., "streaming", "tools", "vision")
-	CreatedAt    time.Time // When the model was created/released
+	ID            string    // Unique identifier (e.g., "claude-sonnet-4-5")
+	Name          string    // Human-readable name
+	Provider      string    // Provider name
+	ContextWindow int       // Maximum context window in tokens
+	MaxOutput     int       // Maximum output tokens
+	Pricing       Pricing   // Cost information
+	Capabilities  []string  // Supported features (e.g., "streaming", "tools", "vision")
+	CreatedAt     time.Time // When the model was created/released
 }
 
 // ModelInfo provides detailed information about a model.
@@ -110,12 +110,12 @@ type CompletionResponse struct {
 
 // StreamToken represents a single token in a streaming response.
 type StreamToken struct {
-	Content   string     // Token content
-	ToolCall  *ToolCall  // Tool call (if any)
-	Done      bool       // True if this is the last token
-	Usage     *Usage     // Usage info (sent with last token)
-	Error     error      // Error (if any)
-	Metadata  map[string]string
+	Content  string    // Token content
+	ToolCall *ToolCall // Tool call (if any)
+	Done     bool      // True if this is the last token
+	Usage    *Usage    // Usage info (sent with last token)
+	Error    error     // Error (if any)
+	Metadata map[string]string
 }
 
 // Message represents a conversation message.
@@ -127,25 +127,25 @@ type Message struct {
 
 // Tool represents a tool/function that the model can call.
 type Tool struct {
-	Name        string        // Tool name
-	Description string        // Tool description
-	Parameters  []Parameter   // Tool parameters
-	Required    []string      // Required parameter names
+	Name        string      // Tool name
+	Description string      // Tool description
+	Parameters  []Parameter // Tool parameters
+	Required    []string    // Required parameter names
 }
 
 // Parameter represents a tool parameter.
 type Parameter struct {
-	Name        string // Parameter name
-	Type        string // Parameter type (e.g., "string", "number", "boolean", "object")
-	Description string // Parameter description
-	Required    bool   // Whether this parameter is required
+	Name        string   // Parameter name
+	Type        string   // Parameter type (e.g., "string", "number", "boolean", "object")
+	Description string   // Parameter description
+	Required    bool     // Whether this parameter is required
 	Enum        []string // Allowed values (optional)
 }
 
 // ToolCall represents a function/tool call made by the model.
 type ToolCall struct {
-	ID        string            // Unique call ID
-	Name      string            // Tool name
+	ID        string                 // Unique call ID
+	Name      string                 // Tool name
 	Arguments map[string]interface{} // Tool arguments
 }
 
@@ -169,9 +169,9 @@ type ProviderConfig struct {
 
 // Error types
 type ProviderError struct {
-	Provider string
-	Code     string
-	Message  string
+	Provider  string
+	Code      string
+	Message   string
 	Retryable bool
 }
 

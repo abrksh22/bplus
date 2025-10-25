@@ -77,8 +77,8 @@ func (p *Provider) ListModels(ctx context.Context) ([]models.Model, error) {
 			ContextWindow: 200000,
 			MaxOutput:     4096,
 			Pricing: models.Pricing{
-				InputTokens:  15.00 / 1000000,  // $15 per million tokens
-				OutputTokens: 75.00 / 1000000,  // $75 per million tokens
+				InputTokens:  15.00 / 1000000, // $15 per million tokens
+				OutputTokens: 75.00 / 1000000, // $75 per million tokens
 			},
 			Capabilities: []string{"streaming", "tools", "vision"},
 		},
@@ -89,8 +89,8 @@ func (p *Provider) ListModels(ctx context.Context) ([]models.Model, error) {
 			ContextWindow: 200000,
 			MaxOutput:     8192,
 			Pricing: models.Pricing{
-				InputTokens:  3.00 / 1000000,   // $3 per million tokens
-				OutputTokens: 15.00 / 1000000,  // $15 per million tokens
+				InputTokens:  3.00 / 1000000,  // $3 per million tokens
+				OutputTokens: 15.00 / 1000000, // $15 per million tokens
 			},
 			Capabilities: []string{"streaming", "tools", "vision"},
 		},
@@ -101,8 +101,8 @@ func (p *Provider) ListModels(ctx context.Context) ([]models.Model, error) {
 			ContextWindow: 200000,
 			MaxOutput:     4096,
 			Pricing: models.Pricing{
-				InputTokens:  0.80 / 1000000,   // $0.80 per million tokens
-				OutputTokens: 4.00 / 1000000,   // $4 per million tokens
+				InputTokens:  0.80 / 1000000, // $0.80 per million tokens
+				OutputTokens: 4.00 / 1000000, // $4 per million tokens
 			},
 			Capabilities: []string{"streaming", "tools", "vision"},
 		},
@@ -307,10 +307,10 @@ func (p *Provider) setHeaders(req *http.Request) {
 
 func (p *Provider) convertRequest(req *models.CompletionRequest, stream bool) *messageRequest {
 	apiReq := &messageRequest{
-		Model:      req.Model,
-		MaxTokens:  req.MaxTokens,
-		Stream:     stream,
-		Messages:   make([]message, len(req.Messages)),
+		Model:     req.Model,
+		MaxTokens: req.MaxTokens,
+		Stream:    stream,
+		Messages:  make([]message, len(req.Messages)),
 	}
 
 	if req.System != "" {
@@ -415,13 +415,13 @@ type message struct {
 }
 
 type messageResponse struct {
-	ID         string          `json:"id"`
-	Type       string          `json:"type"`
-	Role       string          `json:"role"`
-	Content    []contentBlock  `json:"content"`
-	Model      string          `json:"model"`
-	StopReason string          `json:"stop_reason"`
-	Usage      *usageInfo      `json:"usage"`
+	ID         string         `json:"id"`
+	Type       string         `json:"type"`
+	Role       string         `json:"role"`
+	Content    []contentBlock `json:"content"`
+	Model      string         `json:"model"`
+	StopReason string         `json:"stop_reason"`
+	Usage      *usageInfo     `json:"usage"`
 }
 
 type contentBlock struct {

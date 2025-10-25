@@ -11,11 +11,11 @@ import (
 // TestParseModelName tests model name parsing.
 func TestParseModelName(t *testing.T) {
 	tests := []struct {
-		name          string
-		input         string
-		wantProvider  string
-		wantModelID   string
-		wantErr       bool
+		name         string
+		input        string
+		wantProvider string
+		wantModelID  string
+		wantErr      bool
 	}{
 		{
 			name:         "Valid format",
@@ -310,11 +310,11 @@ func TestCompletionRequest(t *testing.T) {
 		Messages: []Message{
 			{Role: "user", Content: "Hello"},
 		},
-		System:      "You are a helpful assistant",
-		Temperature: &temp,
-		TopP:        &topP,
-		TopK:        &topK,
-		MaxTokens:   1000,
+		System:        "You are a helpful assistant",
+		Temperature:   &temp,
+		TopP:          &topP,
+		TopK:          &topK,
+		MaxTokens:     1000,
 		StopSequences: []string{"STOP"},
 		Metadata: map[string]string{
 			"session": "test-session",
