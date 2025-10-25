@@ -203,13 +203,14 @@ See [PLUGIN_DEVELOPMENT.md](docs/PLUGIN_DEVELOPMENT.md) for plugin creation guid
 
 ## Roadmap
 
-- [x] **Phase 1**: Foundation (In Progress)
+- [x] **Phase 1**: Foundation ✅ Complete (2025-10-25)
+- [ ] **Phase 2**: Core Infrastructure (In Progress)
 - [ ] **Phase 6**: Fast Mode MVP (Layer 4 + Layer 6)
 - [ ] **Phase 12**: Thorough Mode (All 7 layers)
 - [ ] **Phase 13.5**: Community Plugin System
 - [ ] **Phase 22**: Public Release v1.0
 
-See [PLAN.md](docs/PLAN.md) for complete development roadmap.
+See [PLAN.md](docs/PLAN.md) for complete development roadmap and [VERIFICATION.md](docs/VERIFICATION.md) for detailed implementation tracking.
 
 ## Contributing
 
@@ -248,9 +249,10 @@ b+ is inspired by and builds upon the excellent work of:
 
 - [Vision Document](docs/VISION.md) - Complete vision and architecture
 - [Implementation Plan](docs/PLAN.md) - Detailed development phases
+- [Verification Document](docs/VERIFICATION.md) - Phase completion tracking
 - [Commands & Flags](docs/COMMANDS_FLAGS.md) - Complete command reference
-- [Plugin Development](docs/PLUGIN_DEVELOPMENT.md) - Create custom tools
-- [Configuration Guide](docs/CONFIGURATION.md) - Advanced configuration
+- [Plugin Development](docs/PLUGIN_DEVELOPMENT.md) - Create custom tools *(coming soon)*
+- [Configuration Guide](docs/CONFIGURATION.md) - Advanced configuration *(coming soon)*
 
 ---
 
