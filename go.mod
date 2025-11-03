@@ -12,7 +12,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go.etcd.io/bbolt v1.4.3
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
-	modernc.org/sqlite v1.39.1
+	modernc.org/sqlite v1.40.0
 )
 
 require (
