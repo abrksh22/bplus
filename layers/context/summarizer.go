@@ -208,6 +208,11 @@ func (s *Summarizer) SummarizeBatch(ctx context.Context, requests []Summarizatio
 	return results, nil
 }
 
+// Token estimation constants
+const (
+	CharsPerToken = 4 // Rough approximation for English text
+)
+
 // estimateTokens estimates token count from text
 // Rough approximation: 1 token ≈ 4 characters for English text
 func estimateTokens(text string) int {
@@ -215,7 +220,7 @@ func estimateTokens(text string) int {
 	chars := len(text)
 
 	// Estimate tokens (4 chars per token is a common approximation)
-	tokens := chars / 4
+	tokens := chars / CharsPerToken
 
 	// Minimum of 1 token
 	if tokens == 0 && chars > 0 {

@@ -58,7 +58,7 @@ type ExportOptions struct {
 }
 
 // ExportSession exports a session to JSON
-func (se *SessionExporter) ExportSession(ctx context.Context, sessionID string, snapshot *ContextSnapshot, messages []models.Message, opts ExportOptions) (*SessionExport, error) {
+func (se *SessionExporter) ExportSession(_ context.Context, sessionID string, snapshot *ContextSnapshot, messages []models.Message, opts ExportOptions) (*SessionExport, error) {
 	export := &SessionExport{
 		Version:    "1.0",
 		ExportedAt: time.Now(),
@@ -108,7 +108,7 @@ func (se *SessionExporter) ExportSession(ctx context.Context, sessionID string, 
 }
 
 // ExportToFile exports session to a JSON file
-func (se *SessionExporter) ExportToFile(ctx context.Context, export *SessionExport, filePath string) error {
+func (se *SessionExporter) ExportToFile(_ context.Context, export *SessionExport, filePath string) error {
 	// Marshal to JSON with indentation
 	data, err := json.MarshalIndent(export, "", "  ")
 	if err != nil {
@@ -129,7 +129,7 @@ func (se *SessionExporter) ExportToFile(ctx context.Context, export *SessionExpo
 }
 
 // ImportFromFile imports a session from a JSON file
-func (se *SessionExporter) ImportFromFile(ctx context.Context, filePath string) (*SessionExport, error) {
+func (se *SessionExporter) ImportFromFile(_ context.Context, filePath string) (*SessionExport, error) {
 	// Read file
 	data, err := os.ReadFile(filePath)
 	if err != nil {
@@ -156,7 +156,7 @@ func (se *SessionExporter) ImportFromFile(ctx context.Context, filePath string) 
 }
 
 // ImportSession imports a session export into the system
-func (se *SessionExporter) ImportSession(ctx context.Context, export *SessionExport, newSessionID string) error {
+func (se *SessionExporter) ImportSession(_ context.Context, export *SessionExport, newSessionID string) error {
 	// Validate export
 	if export.Session.ID == "" {
 		return errors.New(errors.ErrCodeInvalidInput, "export missing session ID")

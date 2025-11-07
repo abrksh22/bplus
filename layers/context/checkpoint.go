@@ -28,7 +28,7 @@ func NewCheckpointManager(db *storage.SQLiteDB) *CheckpointManager {
 }
 
 // CreateCheckpoint creates a new checkpoint
-func (cm *CheckpointManager) CreateCheckpoint(ctx context.Context, sessionID, name, description string, snapshot *ContextSnapshot, messages []models.Message) (*Checkpoint, error) {
+func (cm *CheckpointManager) CreateCheckpoint(_ context.Context, sessionID, name, description string, snapshot *ContextSnapshot, messages []models.Message) (*Checkpoint, error) {
 	checkpointID := generateCheckpointID()
 	now := time.Now()
 
@@ -86,7 +86,7 @@ func (cm *CheckpointManager) CreateCheckpoint(ctx context.Context, sessionID, na
 }
 
 // GetCheckpoint retrieves a checkpoint by ID
-func (cm *CheckpointManager) GetCheckpoint(ctx context.Context, checkpointID string) (*Checkpoint, error) {
+func (cm *CheckpointManager) GetCheckpoint(_ context.Context, checkpointID string) (*Checkpoint, error) {
 	query := `
 		SELECT id, session_id, name, description, created_at, state_snapshot, metadata
 		FROM checkpoints
@@ -137,7 +137,7 @@ func (cm *CheckpointManager) GetCheckpoint(ctx context.Context, checkpointID str
 }
 
 // ListCheckpoints lists all checkpoints for a session
-func (cm *CheckpointManager) ListCheckpoints(ctx context.Context, sessionID string) ([]Checkpoint, error) {
+func (cm *CheckpointManager) ListCheckpoints(_ context.Context, sessionID string) ([]Checkpoint, error) {
 	query := `
 		SELECT id, session_id, name, description, created_at
 		FROM checkpoints
@@ -183,7 +183,7 @@ func (cm *CheckpointManager) RestoreCheckpoint(ctx context.Context, checkpointID
 }
 
 // DeleteCheckpoint deletes a checkpoint
-func (cm *CheckpointManager) DeleteCheckpoint(ctx context.Context, checkpointID string) error {
+func (cm *CheckpointManager) DeleteCheckpoint(_ context.Context, checkpointID string) error {
 	query := `DELETE FROM checkpoints WHERE id = ?`
 
 	result, err := cm.db.DB().Exec(query, checkpointID)

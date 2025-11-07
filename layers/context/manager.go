@@ -12,6 +12,14 @@ import (
 	"github.com/abrksh22/bplus/models"
 )
 
+// Default optimization configuration values
+const (
+	DefaultMaxTokens         = 200000
+	DefaultTargetTokens      = 100000
+	DefaultMinRelevance      = 0.3
+	DefaultOptimizeThreshold = 0.8
+)
+
 // Manager manages context optimization and persistence
 type Manager struct {
 	db            *storage.SQLiteDB
@@ -29,16 +37,16 @@ type Manager struct {
 // NewManager creates a new context manager
 func NewManager(db *storage.SQLiteDB, provider models.Provider, config OptimizationConfig) (*Manager, error) {
 	if config.MaxTokens == 0 {
-		config.MaxTokens = 200000 // Default to 200K
+		config.MaxTokens = DefaultMaxTokens
 	}
 	if config.TargetTokens == 0 {
 		config.TargetTokens = config.MaxTokens / 2 // Default to 50%
 	}
 	if config.MinRelevance == 0 {
-		config.MinRelevance = 0.3 // Default minimum relevance
+		config.MinRelevance = DefaultMinRelevance
 	}
 	if config.OptimizeThreshold == 0 {
-		config.OptimizeThreshold = 0.8 // Optimize at 80% capacity
+		config.OptimizeThreshold = DefaultOptimizeThreshold
 	}
 
 	summarizer := NewSummarizer(provider, config.SummarizationModel)

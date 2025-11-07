@@ -1,3 +1,5 @@
+// Package context provides Layer 6 Context Management for b+.
+// It includes context optimization, summarization, checkpoints, and session management.
 package context
 
 import (
@@ -9,6 +11,7 @@ import (
 // ContextTier represents the storage tier of context
 type ContextTier int
 
+// Context tier definitions
 const (
 	// TierHot - in-memory, immediately available (0-50K tokens)
 	TierHot ContextTier = iota
@@ -16,6 +19,21 @@ const (
 	TierWarm
 	// TierCold - database, loaded only when needed (200K+ tokens)
 	TierCold
+)
+
+// ContextItemType categorizes context items
+type ContextItemType string
+
+// Context item type definitions
+const (
+	TypeUserIntent   ContextItemType = "user_intent"
+	TypePlan         ContextItemType = "plan"
+	TypeFileContent  ContextItemType = "file_content"
+	TypeValidation   ContextItemType = "validation"
+	TypeMessage      ContextItemType = "message"
+	TypeArchitecture ContextItemType = "architecture"
+	TypeToolResult   ContextItemType = "tool_result"
+	TypeSummary      ContextItemType = "summary"
 )
 
 // ContextItem represents a piece of context
@@ -29,20 +47,6 @@ type ContextItem struct {
 	Relevance    float64 // 0.0 to 1.0
 	Metadata     map[string]interface{}
 }
-
-// ContextItemType categorizes context items
-type ContextItemType string
-
-const (
-	TypeUserIntent     ContextItemType = "user_intent"
-	TypePlan           ContextItemType = "plan"
-	TypeFileContent    ContextItemType = "file_content"
-	TypeValidation     ContextItemType = "validation"
-	TypeMessage        ContextItemType = "message"
-	TypeArchitecture   ContextItemType = "architecture"
-	TypeToolResult     ContextItemType = "tool_result"
-	TypeSummary        ContextItemType = "summary"
-)
 
 // ContextSnapshot represents a point-in-time snapshot of context
 type ContextSnapshot struct {
@@ -102,6 +106,7 @@ type Checkpoint struct {
 // OptimizationStrategy defines how to optimize context
 type OptimizationStrategy string
 
+// Optimization strategy definitions
 const (
 	StrategyAggressiveSummarization OptimizationStrategy = "aggressive_summarization"
 	StrategySelectivePruning        OptimizationStrategy = "selective_pruning"

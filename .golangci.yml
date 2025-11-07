@@ -1,3 +1,5 @@
+version: "2"
+
 run:
   timeout: 5m
   issues-exit-code: 1
@@ -14,7 +16,6 @@ linters:
   enable:
     # Default linters
     - errcheck    # Check for unchecked errors
-    - gosimple    # Simplify code
     - govet       # Vet examines Go source code
     - ineffassign # Detect ineffectual assignments
     - staticcheck # Go static analysis
@@ -24,13 +25,10 @@ linters:
     - bodyclose      # Check HTTP response body is closed
     - dogsled        # Check for too many blank identifiers
     - dupl           # Code clone detection
-    - exportloopref  # Check for pointers to enclosing loop variables
     - gochecknoinits # Check for init functions
     - goconst        # Find repeated strings that could be constants
     - gocritic       # Go critic
     - gocyclo        # Cyclomatic complexity
-    - gofmt          # Check code is gofmt'd
-    - goimports      # Check imports are formatted
     - goprintffuncname # Check printf-like functions are named correctly
     - gosec          # Security checks
     - misspell       # Spell checker
@@ -39,8 +37,6 @@ linters:
     - revive         # Fast, configurable linter
     - rowserrcheck   # Check SQL rows.Err is checked
     - sqlclosecheck  # Check SQL rows/statements are closed
-    - stylecheck     # Style checks
-    - typecheck      # Type checks
     - unconvert      # Remove unnecessary type conversions
     - unparam        # Find unused function parameters
     - whitespace     # Check for unnecessary whitespace
